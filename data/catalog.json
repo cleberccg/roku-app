@@ -1,0 +1,56 @@
+[
+    {
+        "id":  "bunny",
+        "title":  "Big Buck Bunny",
+        "category":  "Animação",
+        "description":  "Curta de animação do projeto Blender. Um coelho e seus vizinhos da floresta. Cópia de teste hospedada pelo W3C.",
+        "poster":  "pkg:/images/posters/bunny.jpg",
+        "videoUrl":  "https://media.w3.org/2010/05/bunny/movie.mp4",
+        "streamFormat":  "mp4"
+    },
+    {
+        "id":  "dream",
+        "title":  "Big Buck Bunny — Trailer",
+        "category":  "Animação",
+        "description":  "Trailer de Big Buck Bunny, do projeto Blender. Um vídeo curto para testar a reprodução e o retorno aos detalhes.",
+        "poster":  "pkg:/images/posters/bunny.jpg",
+        "videoUrl":  "https://media.w3.org/2010/05/bunny/trailer.mp4",
+        "streamFormat":  "mp4"
+    },
+    {
+        "id":  "sintel",
+        "title":  "Sintel — Trailer",
+        "category":  "Animação",
+        "description":  "Trailer da aventura de fantasia Sintel, do projeto Blender. Mídia de teste hospedada pelo W3C.",
+        "poster":  "pkg:/images/posters/sintel.jpg",
+        "videoUrl":  "https://media.w3.org/2010/05/sintel/trailer.mp4",
+        "streamFormat":  "mp4"
+    },
+    {
+        "id":  "blazes",
+        "title":  "Clipe de teste — 5 segundos",
+        "category":  "Demonstrações",
+        "description":  "Clipe MP4 de demonstração do Samplelib, com cerca de 5 segundos, para verificar início e fim da reprodução. Capa ilustrativa.",
+        "poster":  "pkg:/images/posters/blazes.jpg",
+        "videoUrl":  "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+        "streamFormat":  "mp4"
+    },
+    {
+        "id":  "escapes",
+        "title":  "Clipe de teste — 10 segundos",
+        "category":  "Demonstrações",
+        "description":  "Clipe MP4 de demonstração do Samplelib, com cerca de 10 segundos, para testar pausa, retomada e navegação. Capa ilustrativa.",
+        "poster":  "pkg:/images/posters/escapes.jpg",
+        "videoUrl":  "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
+        "streamFormat":  "mp4"
+    },
+    {
+        "id":  "fun",
+        "title":  "Clipe de teste — 15 segundos",
+        "category":  "Demonstrações",
+        "description":  "Clipe MP4 de demonstração do Samplelib, com cerca de 15 segundos, para testar a reprodução e os favoritos. Capa ilustrativa.",
+        "poster":  "pkg:/images/posters/fun.jpg",
+        "videoUrl":  "https://samplelib.com/lib/preview/mp4/sample-15s.mp4",
+        "streamFormat":  "mp4"
+    }
+]

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="PosterItem" extends="Group">
+    <script type="text/brightscript" uri="pkg:/components/PosterItem.brs" />
+    <!-- Fields públicos são preenchidos pela RowList. onChange liga alterações
+         de dados e foco aos callbacks em PosterItem.brs. -->
+    <interface>
+        <field id="itemContent" type="node" onChange="showContent" />
+        <field id="focusPercent" type="float" onChange="showFocus" />
+        <field id="rowFocusPercent" type="float" onChange="showFocus" />
+    </interface>
+    <!-- A borda fica atrás do cartão. A margem interna de 4 px deixa o roxo
+         aparecer só quando o item participa do foco da linha selecionada. -->
+    <children>
+        <Rectangle id="focusBorder" width="260" height="180" color="0x8B5CF6FF" visible="false" />
+        <Rectangle translation="[4,4]" width="252" height="172" color="0x18243AFF" />
+        <!-- scaleToFit preserva toda a miniatura sem distorcer sua proporção. -->
+        <Poster id="poster" translation="[8,8]" width="244" height="126" loadDisplayMode="scaleToFit" />
+        <Label id="label" translation="[12,138]" width="236" height="34" horizAlign="center" font="font:SmallBoldSystemFont" />
+    </children>
+</component>
