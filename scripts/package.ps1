@@ -3,6 +3,7 @@ $ErrorActionPreference = 'Stop'
 # PSScriptRoot é a pasta deste script, mesmo quando ele é chamado de outro lugar.
 # O projeto fica um nível acima, e dist concentra os artefatos não versionados.
 $projectRoot = Split-Path -Parent $PSScriptRoot
+& (Join-Path $PSScriptRoot 'validate-project.ps1')
 $outputDirectory = Join-Path $projectRoot 'dist'
 New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
 $packagePath = Join-Path $outputDirectory 'roku-showcase.zip'

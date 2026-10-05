@@ -63,7 +63,7 @@ A categoria Favoritos aparece depois que um vídeo é adicionado. A lista fica s
 
 ## Personalizar o catálogo
 
-Edite `data/catalog.json`. Cada entrada usa os campos `id` (único), `title`, `category`, `description`, `poster`, `videoUrl` e `streamFormat`. As categorias disponíveis são `Animação` e `Demonstrações`; para criar outras, ajuste também a lista em `buildCatalog()`.
+Edite `data/catalog.json`. Cada entrada usa os campos `id` (único), `title`, `category`, `description`, `poster`, `videoUrl` e `streamFormat`. Todos são strings obrigatórias e não vazias. As categorias são criadas automaticamente na ordem do catálogo; `Favoritos` é um nome reservado. Esta versão aceita `mp4`, vídeos HTTPS e capas locais existentes em `pkg:/images/`.
 
 Use `pkg:/images/arquivo.png` para imagens empacotadas e uma URL HTTPS para vídeos. Cada cartão usa uma capa ilustrada própria em `images/posters/`, armazenada no pacote para abrir sem internet. O catálogo inclui seis vídeos de teste; não há autenticação, DRM ou serviço de streaming próprio.
 
@@ -77,6 +77,27 @@ O ícone tem versões HD e FHD, e a tela de abertura usa 1280 × 720. As artes s
 - Adicionar e remover favoritos usando a estrela.
 - Fechar e reabrir o app para verificar a persistência dos favoritos.
 - Interromper a conexão e verificar a mensagem de erro ao reproduzir.
+- Voltar dos detalhes sem alterar favoritos e conferir que o foco permanece no item.
+- Adicionar/remover favoritos e conferir que o retorno preserva o item na categoria de origem; ao remover da linha Favoritos, ele deve ser localizado na categoria original.
+- Testar um catálogo inválido e verificar a mensagem de erro, sem abrir a lista.
+
+## Qualidade e decisões técnicas
+
+Execute a verificação offline antes de instalar:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/validate-project.ps1
+```
+
+Ela valida campos, IDs duplicados, URLs HTTPS, arquivos das capas e XML/referências de scripts. O empacotamento executa essa verificação automaticamente. O GitHub Actions repete a validação e gera o ZIP como artefato em pushes e pull requests. A checagem de URLs externas continua separada, pois depende de rede e servidores de terceiros.
+
+O catálogo também é validado no dispositivo antes de chegar à cena. Um item inválido interrompe a carga com uma mensagem, evitando exibir um catálogo parcialmente incorreto. IDs são considerados únicos sem distinção de maiúsculas/minúsculas.
+
+A arquitetura continua com três componentes: a Task carrega e valida dados; a cena coordena navegação, favoritos e reprodução; o cartão apresenta conteúdo. O catálogo local mantém a demonstração reproduzível e dispensa um backend. Não foram adicionados autenticação, camadas de serviço ou dependências de Node.js.
+
+A lista só é reconstruída quando os favoritos mudam. Favoritos restaurados são filtrados por tipo e deduplicados; a interface só confirma uma alteração depois de `Write` e `Flush` retornarem sucesso. Falhas do player registram ID, código e mensagem no console de depuração, acessível pela porta 8085 do Roku.
+
+Estas verificações não compilam BrightScript nem comprovam reprodução, foco ou compatibilidade com hardware. Os cenários acima precisam ser conferidos no dispositivo. Para apresentar o portfólio, acrescente uma gravação curta desses fluxos e informe o modelo e a versão do Roku usados na validação.
 
 ## Mídias
 

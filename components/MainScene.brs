@@ -17,13 +17,20 @@ sub init()
     ' m.screen indica qual tela deve interpretar as teclas e os eventos do player.
     m.screen = "catalog"
     m.favorites = []
+    m.catalogDirty = false
     ' O registry guarda strings no dispositivo. FormatJson/ParseJson fazem a
     ' conversão entre uma lista BrightScript e o texto salvo na chave favorites.
     ' A seção separa nossas preferências de outras configurações do canal.
     m.registry = CreateObject("roRegistrySection", "RokuShowcase")
     saved = ParseJson(m.registry.Read("favorites"))
     ' Na primeira execução ou se o valor estiver inválido, usamos a lista vazia.
-    if type(saved) = "roArray" then m.favorites = saved
+    if type(saved) = "roArray"
+        for each id in saved
+            if type(id) = "roString" or type(id) = "String"
+                if id.trim() <> "" and not isFavorite(id) then m.favorites.push(id)
+            end if
+        end for
+    end if
     ' observeField registra callbacks; não executa a função imediatamente.
     ' A RowList entrega [índice da linha, índice do item] quando o usuário dá OK.
     m.catalog.observeField("rowItemSelected", "onItemSelected")
@@ -63,7 +70,15 @@ end function
 ' compartilhar os mesmos dados entre os cartões, os detalhes e o player.
 sub buildCatalog()
     root = CreateObject("roSGNode", "ContentNode")
-    for each category in ["Favoritos", "Animação", "Demonstrações"]
+    categories = ["Favoritos"]
+    seen = {}
+    for each item in m.items
+        if not seen.doesExist(item.category)
+            categories.push(item.category)
+            seen[item.category] = true
+        end if
+    end for
+    for each category in categories
         row = CreateObject("roSGNode", "ContentNode")
         row.title = category
         for each item in m.items
@@ -85,6 +100,27 @@ sub buildCatalog()
         if row.getChildCount() > 0 then root.appendChild(row)
     end for
     m.catalog.content = root
+    m.catalogDirty = false
+end sub
+
+' Após uma mudança nos favoritos, restaura o item na categoria de origem.
+' Se ele foi removido da linha Favoritos, usa a categoria real como alternativa.
+sub restoreSelection()
+    root = m.catalog.content
+    fallback = [0, 0]
+    for rowIndex = 0 to root.getChildCount() - 1
+        row = root.getChild(rowIndex)
+        for itemIndex = 0 to row.getChildCount() - 1
+            if row.getChild(itemIndex).id = m.selectedItem.id
+                fallback = [rowIndex, itemIndex]
+                if row.title = m.selectedCategory
+                    m.catalog.jumpToRowItem = fallback
+                    return
+                end if
+            end if
+        end for
+    end for
+    m.catalog.jumpToRowItem = fallback
 end sub
 
 ' Uma falha de leitura fica na tela de catálogo, onde não existe item selecionado.
@@ -98,10 +134,12 @@ sub onItemSelected()
     indexes = m.catalog.rowItemSelected
     if indexes = invalid then return
     if indexes.count() < 2 then return
+    if m.catalog.content = invalid then return
     row = m.catalog.content.getChild(indexes[0])
     if row = invalid then return
     m.selectedItem = row.getChild(indexes[1])
     if m.selectedItem = invalid then return
+    m.selectedCategory = row.title
     m.detailPoster.uri = m.selectedItem.hdPosterUrl
     m.detailTitle.text = m.selectedItem.title
     m.detailDescription.text = m.selectedItem.description
@@ -132,10 +170,20 @@ sub toggleFavorite()
         if id <> m.selectedItem.id then updated.push(id)
     end for
     if not exists then updated.push(m.selectedItem.id)
-    m.favorites = updated
-    m.registry.Write("favorites", FormatJson(updated))
+    previous = FormatJson(m.favorites)
+    if not m.registry.Write("favorites", FormatJson(updated))
+        m.detailHint.text = "Não foi possível salvar os favoritos. *: tentar novamente | BACK: voltar"
+        return
+    end if
     ' Write altera o valor da seção; Flush solicita que seja gravado no storage.
-    m.registry.Flush()
+    if not m.registry.Flush()
+        ' Restaura também o valor em memória do registry para uma próxima tentativa.
+        m.registry.Write("favorites", previous)
+        m.detailHint.text = "Não foi possível salvar os favoritos. *: tentar novamente | BACK: voltar"
+        return
+    end if
+    m.favorites = updated
+    m.catalogDirty = true
     updateHint()
 end sub
 
@@ -160,6 +208,7 @@ end sub
 sub onVideoStateChanged()
     if m.screen <> "video" then return
     if m.video.state = "error"
+        print "[player] id="; m.selectedItem.id; " code="; m.video.errorCode; " message="; m.video.errorMsg
         closeVideo()
         m.detailHint.text = "Vídeo indisponível. Verifique a conexão. OK: tentar novamente | BACK: voltar"
     else if m.video.state = "finished"
@@ -198,7 +247,10 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
         else if key = "back"
             ' Aplicamos as alterações de favoritos ao voltar, sem reconstruir a
             ' lista enquanto o usuário ainda está interagindo com os detalhes.
-            buildCatalog()
+            if m.catalogDirty
+                buildCatalog()
+                restoreSelection()
+            end if
             m.screen = "catalog"
             m.details.visible = false
             m.status.visible = true
